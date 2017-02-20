@@ -2,6 +2,8 @@
 import { render } from 'react-dom'
 import {FilterableProductTable} from './components/Products'
 import ItemList from './components/ItemList'
+import { Provider } from 'react-redux';
+import configureStore from './components/store/configureStore';
 
 var PRODUCTS = [
     {category: 'Sporting Goods', price: '£49.99', stocked: true, name: 'Football'},
@@ -11,14 +13,18 @@ var PRODUCTS = [
     {category: 'Electronics', price: '£399.99', stocked: true, name: 'iPhone 5'},
     {category: 'Electronics', price: '£199.99', stocked: true, name: 'Nexus 7'}
 ];
- 
+
+const store = configureStore();
+
 render((
     <table>
         <tbody>
             <tr>
                 <td><FilterableProductTable products={PRODUCTS} /></td>
                 <td>
-                    <ItemList />
+                    <Provider store={store}>
+                        <ItemList />
+                    </Provider>
                 </td>
             </tr>
         </tbody>

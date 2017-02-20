@@ -20,9 +20,17 @@ webpackJsonp([0],{
 	
 	var _ItemList2 = _interopRequireDefault(_ItemList);
 	
+	var _reactRedux = __webpack_require__(/*! react-redux */ 180);
+	
+	var _configureStore = __webpack_require__(/*! ./components/store/configureStore */ 229);
+	
+	var _configureStore2 = _interopRequireDefault(_configureStore);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var PRODUCTS = [{ category: 'Sporting Goods', price: '£49.99', stocked: true, name: 'Football' }, { category: 'Sporting Goods', price: '£9.99', stocked: true, name: 'Cricket ball' }, { category: 'Sporting Goods', price: '£29.99', stocked: false, name: 'Basketball' }, { category: 'Electronics', price: '£99.99', stocked: true, name: 'iPod Touch' }, { category: 'Electronics', price: '£399.99', stocked: true, name: 'iPhone 5' }, { category: 'Electronics', price: '£199.99', stocked: true, name: 'Nexus 7' }];
+	
+	var store = (0, _configureStore2.default)();
 	
 	(0, _reactDom.render)(_react2.default.createElement(
 	    'table',
@@ -41,7 +49,11 @@ webpackJsonp([0],{
 	            _react2.default.createElement(
 	                'td',
 	                null,
-	                _react2.default.createElement(_ItemList2.default, null)
+	                _react2.default.createElement(
+	                    _reactRedux.Provider,
+	                    { store: store },
+	                    _react2.default.createElement(_ItemList2.default, null)
+	                )
 	            )
 	        )
 	    )
@@ -303,6 +315,10 @@ webpackJsonp([0],{
 	
 	var _react2 = _interopRequireDefault(_react);
 	
+	var _reactRedux = __webpack_require__(/*! react-redux */ 180);
+	
+	var _items = __webpack_require__(/*! ./actions/items */ 228);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -317,51 +333,25 @@ webpackJsonp([0],{
 	    function ItemList() {
 	        _classCallCheck(this, ItemList);
 	
-	        var _this = _possibleConstructorReturn(this, (ItemList.__proto__ || Object.getPrototypeOf(ItemList)).call(this));
-	
-	        _this.state = {
-	            items: []
-	        };
-	        return _this;
+	        return _possibleConstructorReturn(this, (ItemList.__proto__ || Object.getPrototypeOf(ItemList)).apply(this, arguments));
 	    }
 	
 	    _createClass(ItemList, [{
-	        key: 'fetchData',
-	        value: function fetchData(url) {
-	            var _this2 = this;
-	
-	            this.setState({ isLoading: true });
-	
-	            fetch(url).then(function (response) {
-	                if (!response.ok) {
-	                    throw Error(response.statusText);
-	                }
-	                _this2.setState({ isLoading: false });
-	                return response;
-	            }).then(function (response) {
-	                return response.json();
-	            }).then(function (items) {
-	                return _this2.setState({ items: items });
-	            }).catch(function () {
-	                return _this2.setState({ hasErrored: true });
-	            });
-	        }
-	    }, {
 	        key: 'componentDidMount',
 	        value: function componentDidMount() {
-	            this.fetchData('http://5826ed963900d612000138bd.mockapi.io/items');
+	            this.props.fetchData('http://5826ed963900d612000138bd.mockapi.io/items');
 	        }
 	    }, {
 	        key: 'render',
 	        value: function render() {
-	            if (this.state.hasErrored) {
+	            if (this.props.hasErrored) {
 	                return _react2.default.createElement(
 	                    'p',
 	                    null,
 	                    'Sorry! There was an error loading the items'
 	                );
 	            }
-	            if (this.state.isLoading) {
+	            if (this.props.isLoading) {
 	                return _react2.default.createElement(
 	                    'p',
 	                    null,
@@ -371,7 +361,7 @@ webpackJsonp([0],{
 	            return _react2.default.createElement(
 	                'ul',
 	                null,
-	                this.state.items.map(function (item) {
+	                this.props.items.map(function (item) {
 	                    return _react2.default.createElement(
 	                        'li',
 	                        { key: item.id },
@@ -385,7 +375,188 @@ webpackJsonp([0],{
 	    return ItemList;
 	}(_react.Component);
 	
-	exports.default = ItemList;
+	var mapStateToProps = function mapStateToProps(state) {
+	    return {
+	        items: state.items,
+	        hasErrored: state.itemsHasErrored,
+	        isLoading: state.itemsIsLoading
+	    };
+	};
+	
+	var mapDispatchToProps = function mapDispatchToProps(dispatch) {
+	    return {
+	        fetchData: function fetchData(url) {
+	            return dispatch((0, _items.itemsFetchData)(url));
+	        }
+	    };
+	};
+	
+	exports.default = (0, _reactRedux.connect)(mapStateToProps, mapDispatchToProps)(ItemList);
+
+/***/ },
+
+/***/ 228:
+/*!*****************************************!*\
+  !*** ./app/components/actions/items.js ***!
+  \*****************************************/
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.itemsHasErrored = itemsHasErrored;
+	exports.itemsIsLoading = itemsIsLoading;
+	exports.itemsFetchDataSuccess = itemsFetchDataSuccess;
+	exports.itemsFetchData = itemsFetchData;
+	function itemsHasErrored(bool) {
+	    return {
+	        type: 'ITEMS_HAS_ERRORED',
+	        hasErrored: bool
+	    };
+	}
+	
+	function itemsIsLoading(bool) {
+	    return {
+	        type: 'ITEMS_IS_LOADING',
+	        isLoading: bool
+	    };
+	}
+	
+	function itemsFetchDataSuccess(items) {
+	    return {
+	        type: 'ITEMS_FETCH_DATA_SUCCESS',
+	        items: items
+	    };
+	}
+	
+	function itemsFetchData(url) {
+	    return function (dispatch) {
+	        dispatch(itemsIsLoading(true));
+	
+	        fetch(url).then(function (response) {
+	            if (!response.ok) {
+	                throw Error(response.statusText);
+	            }
+	            dispatch(itemsIsLoading(false));
+	            return response;
+	        }).then(function (response) {
+	            return response.json();
+	        }).then(function (items) {
+	            return dispatch(itemsFetchDataSuccess(items));
+	        }).catch(function () {
+	            return dispatch(itemsHasErrored(true));
+	        });
+	    };
+	}
+
+/***/ },
+
+/***/ 229:
+/*!************************************************!*\
+  !*** ./app/components/store/configureStore.js ***!
+  \************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.default = configureStore;
+	
+	var _redux = __webpack_require__(/*! redux */ 191);
+	
+	var _reduxThunk = __webpack_require__(/*! redux-thunk */ 230);
+	
+	var _reduxThunk2 = _interopRequireDefault(_reduxThunk);
+	
+	var _reducers = __webpack_require__(/*! ../reducers */ 231);
+	
+	var _reducers2 = _interopRequireDefault(_reducers);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function configureStore(initialState) {
+	    return (0, _redux.createStore)(_reducers2.default, initialState, (0, _redux.applyMiddleware)(_reduxThunk2.default));
+	}
+
+/***/ },
+
+/***/ 231:
+/*!******************************************!*\
+  !*** ./app/components/reducers/index.js ***!
+  \******************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _redux = __webpack_require__(/*! redux */ 191);
+	
+	var _items = __webpack_require__(/*! ./items */ 232);
+	
+	exports.default = (0, _redux.combineReducers)({
+	    items: _items.items,
+	    itemsHasErrored: _items.itemsHasErrored,
+	    itemsIsLoading: _items.itemsIsLoading
+	});
+
+/***/ },
+
+/***/ 232:
+/*!******************************************!*\
+  !*** ./app/components/reducers/items.js ***!
+  \******************************************/
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.itemsHasErrored = itemsHasErrored;
+	exports.itemsIsLoading = itemsIsLoading;
+	exports.items = items;
+	function itemsHasErrored() {
+	    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+	    var action = arguments[1];
+	
+	    switch (action.type) {
+	        case 'ITEMS_HAS_ERRORED':
+	            return action.hasErrored;
+	        default:
+	            return state;
+	    }
+	}
+	
+	function itemsIsLoading() {
+	    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+	    var action = arguments[1];
+	
+	    switch (action.type) {
+	        case 'ITEMS_IS_LOADING':
+	            return action.isLoading;
+	        default:
+	            return state;
+	    }
+	}
+	
+	function items() {
+	    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+	    var action = arguments[1];
+	
+	    switch (action.type) {
+	        case 'ITEMS_FETCH_DATA_SUCCESS':
+	            return action.items;
+	        default:
+	            return state;
+	    }
+	}
 
 /***/ }
 
